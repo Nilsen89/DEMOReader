@@ -3,15 +3,19 @@ package reader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipException;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 
 import org.xerial.snappy.Snappy;
 
 public class DEMOReader {
 
-	byte[] compressed, decompressed;
-	byte[] data = new byte[1];
+	public byte[] data;
+	
+	public static final int HEADERLEN = 8;
+	public static final int STRINGLEN = 260;
+	public static final int FLOATLEN = 4;
+	public static final int INTLEN = 4;
 	
 	private String header; 				//8 characters, should be "HL2DEMO"+NULL
 	private int demoProtocol;			//Demo protocol version
@@ -21,137 +25,67 @@ public class DEMOReader {
 	private String mapName;				//260 characters long
 	private String gameDirectory;		//260 characters long
 	private float playbackTime;			//The length of the demo, in seconds
-	private int	ficks;					//The number of ticks in the demo
+	private int	ticks;					//The number of ticks in the demo
 	private int	frames;					//The number of frames in the demo
 	private int	signOnLength;			//Length of the sign on data (Init for first frame)
 	
-	public DEMOReader() {}
-	
-	public void readDemo() throws IOException {
-			FileInputStream fis = new FileInputStream("src/reader/demo2.dem");
-			DataInputStream dis = new DataInputStream(fis);
-			
-			fetchHeader(dis);
-			System.out.println("Header: "+header);
-			
-			fetchDemoProtocol(dis);
-			System.out.println("Demo Protocol: "+demoProtocol);
-			
-			fetchNetworkProtocol(dis);
-			System.out.println("Network Protocol: "+networkProtocol);
-			
-			fetchServerName(dis);
-			System.out.println("Server name: "+serverName);
-			
-			fetchClientName(dis);
-			System.out.println("Client name: "+clientName);
-			
-			fetchMapName(dis);
-			System.out.println("Map name: "+mapName);
-			
-			fetchGameDirectory(dis);
-			System.out.println("Game directory: "+gameDirectory);
-			
-			//fetchPlaybackTime(dis);
-			//System.out.println(playbackTime);
-			
-			tester(dis, true, 5000, true);
+	public DEMOReader(String url) throws IOException {
+		FileInputStream fis = new FileInputStream(url);
+		DataInputStream buffer = new DataInputStream(fis);
+		
+		readDemo(buffer);
 	}
 	
-	
-	public void fetchHeader(DataInputStream dis) throws IOException {
-		String tempBuffer = "";
-		int readPos = 0;
-		while(readPos++ < 12) {
-			dis.read(data);
-			if(data[0] > 47) {				
-				tempBuffer += (new String(data, "ISO-8859-1"));
-			}
-		}
-		this.header = tempBuffer;
+	public void readDemo(DataInputStream buffer) throws IOException {
+			
+			header = readString(buffer, HEADERLEN);
+			demoProtocol = readInt(buffer);
+			networkProtocol = readInt(buffer);
+			serverName = readString(buffer, STRINGLEN);
+			clientName = readString(buffer, STRINGLEN);
+			mapName = readString(buffer, STRINGLEN);
+			gameDirectory = readString(buffer, STRINGLEN);
+			playbackTime = readFloat(buffer);
+			ticks = readInt(buffer);
+			frames = readInt(buffer);
+			signOnLength = readInt(buffer);
+		
+			System.out.println("HEADER: "+header);
+			System.out.println("DEMOPROTOCOL: "+demoProtocol);
+			System.out.println("NETWORKPROTOCOL: "+networkProtocol);
+			System.out.println("SERVERNAME: "+serverName);
+			System.out.println("CLIENTNAME: "+clientName);
+			System.out.println("MAPNAME: "+mapName);
+			System.out.println("GAMEDIR: "+gameDirectory);
+			System.out.println("PLAYBACKTIME: "+playbackTime);
+			System.out.println("TICKS: "+ticks);
+			System.out.println("FRAMES: "+frames);
+			System.out.println("SIGNONLENGTH: "+signOnLength);
+			
+			//tester(buffer, false, 2000, false);
+	}
+
+	public String readString(DataInputStream buffer, int len) throws IOException {
+		data = new byte[len];
+		buffer.read(data, 0, len);
+		return (new String(data, "ISO-8859-1"));
 	}
 	
-	public void fetchDemoProtocol(DataInputStream dis) throws IOException {
-		dis.read(data);
-		if(data[0] < 47) {
-			demoProtocol = -1;
-		} else {			
-			this.demoProtocol = Integer.parseInt(new String(data, "ISO-8859-1"));
-		}
+	public int readInt(DataInputStream buffer) throws IOException {
+		return Integer.reverseBytes(buffer.readInt());
 	}
 	
-	public void fetchNetworkProtocol(DataInputStream dis) throws IOException {
-		dis.read(data);
-		this.networkProtocol = Integer.parseInt(new String(data, "ISO-8859-1"));
+	public float readFloat(DataInputStream buffer) throws IOException {
+		return Float.intBitsToFloat(Integer.reverseBytes(buffer.readInt()));
 	}
 	
-	public void fetchClientName(DataInputStream dis) throws IOException {
-		int readPos = 0;
-		String tempBuffer = "";
-		while(readPos++ < 260) {
-			dis.read(data);
-			if(data[0] > 47) {				
-				tempBuffer += (new String(data, "ISO-8859-1"));
-			}
-		}
-		this.clientName = tempBuffer;
-	}
-	
-	public void fetchServerName(DataInputStream dis) throws IOException {
-		int readPos = 0;
-		String tempBuffer = "";
-		while(readPos++ < 260) {
-			dis.read(data);
-			if(data[0] > 47) {				
-				tempBuffer += (new String(data, "ISO-8859-1"));
-			}
-		}
-		this.serverName = tempBuffer;
-	}
-	
-	public void fetchMapName(DataInputStream dis) throws IOException {
-		int readPos = 0;
-		String tempBuffer = "";
-		while(readPos++ < 260) {
-			dis.read(data);
-			if(data[0] > 47) {				
-				tempBuffer += (new String(data, "ISO-8859-1"));
-			}
-		}
-		this.mapName = tempBuffer;
-	}
-	
-	public void fetchGameDirectory(DataInputStream dis) throws IOException {
-		int readPos = 0;
-		String tempBuffer = "";
-		while(readPos++ < 260) {
-			dis.read(data);
-			if(data[0] > 47) {				
-				tempBuffer += (new String(data, "ISO-8859-1"));
-			}
-		}
-		this.gameDirectory = tempBuffer;
-	}
-	
-	public void fetchPlaybackTime(DataInputStream dis) throws IOException {
-		int readPos = 0;
-		String tempBuffer = "";
-		while(readPos++ < 4) {
-			dis.read(data);
-			if(data[0] > 47) {
-				tempBuffer += (new String(data, "ISO-8859-1"));
-			}
-		}
-		this.playbackTime = Float.parseFloat(tempBuffer);
-	}
-	
-	public void tester(DataInputStream dis, boolean filter, int testLimit, boolean decompress) throws IOException {
+	public void tester(DataInputStream buffer, boolean filter, int testLimit, boolean decompress) throws IOException {
 		
 		int testCount = 0;
 		String uncompressed;
-		
+		data = new byte[1];
 		while(testCount++ < testLimit) {
-			dis.read(data);
+			buffer.read(data);
 			if (Snappy.isValidCompressedBuffer(data) && decompress) {
 				uncompressed = Snappy.uncompressString(data);
 				System.out.println(uncompressed);
@@ -160,13 +94,12 @@ public class DEMOReader {
 					System.out.print(new String(data, "ISO-8859-1"));
 				}
 			} else {
-				System.out.print(new String(data, "ISO-8859-1"));
+				System.out.print(data[0]+" ");
 			}
 		}
 	}
 	
 	public static void main(String[] args) throws IOException {
-		DEMOReader demo = new DEMOReader();
-		demo.readDemo();
+		DEMOReader demo = new DEMOReader("src/reader/demo.dem");
 	}
 }
