@@ -6,10 +6,11 @@ import java.io.FileNotFoundException;
 
 public class FileBuffer {
 	
+	FileInputStream fis;
 	DataInputStream buffer;
 	
 	public FileBuffer(String url) throws FileNotFoundException {
-		FileInputStream fis = new FileInputStream(url);
+		fis = new FileInputStream(url);
 		buffer = new DataInputStream(fis);
 	}
 	

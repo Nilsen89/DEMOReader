@@ -1,10 +1,7 @@
 package reader;
 
 import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
 
 import org.xerial.snappy.Snappy;
 
@@ -12,44 +9,36 @@ public class DEMOReader {
 
 	public byte[] data;
 	
-	public static final int HEADERLEN = 8;
-	public static final int STRINGLEN = 260;
-	public static final int FLOATLEN = 4;
-	public static final int INTLEN = 4;
+	public static String header; 				//8 characters, should be "HL2DEMO"+NULL
+	public static int demoProtocol;			//Demo protocol version
+	public static int networkProtocol;		//Network protocol version number
+	public static String serverName;			//260 characters long
+	public static String clientName;			//260 characters long
+	public static String mapName;				//260 characters long
+	public static String gameDirectory;		//260 characters long
+	public static float playbackTime;			//The length of the demo, in seconds
+	public static int ticks;					//The number of ticks in the demo
+	public static int frames;					//The number of frames in the demo
+	public static int signOnLength;			//Length of the sign on data (Init for first frame)
 	
-	private String header; 				//8 characters, should be "HL2DEMO"+NULL
-	private int demoProtocol;			//Demo protocol version
-	private int	networkProtocol;		//Network protocol version number
-	private String serverName;			//260 characters long
-	private String clientName;			//260 characters long
-	private String mapName;				//260 characters long
-	private String gameDirectory;		//260 characters long
-	private float playbackTime;			//The length of the demo, in seconds
-	private int	ticks;					//The number of ticks in the demo
-	private int	frames;					//The number of frames in the demo
-	private int	signOnLength;			//Length of the sign on data (Init for first frame)
+	public DEMOReader() {}
 	
-	public DEMOReader(String url) throws IOException {
-		FileInputStream fis = new FileInputStream(url);
-		DataInputStream buffer = new DataInputStream(fis);
-		
-		readDemo(buffer);
-	}
-	
-	public void readDemo(DataInputStream buffer) throws IOException {
+	public void parseHeader(DataInputStream buffer) throws IOException {
 			
-			header = readString(buffer, HEADERLEN);
-			demoProtocol = readInt(buffer);
-			networkProtocol = readInt(buffer);
-			serverName = readString(buffer, STRINGLEN);
-			clientName = readString(buffer, STRINGLEN);
-			mapName = readString(buffer, STRINGLEN);
-			gameDirectory = readString(buffer, STRINGLEN);
-			playbackTime = readFloat(buffer);
-			ticks = readInt(buffer);
-			frames = readInt(buffer);
-			signOnLength = readInt(buffer);
-		
+			System.out.println("-----Parsing Header------");
+			
+			header = Readers.readString(buffer, Readers.HEADERLEN);
+			demoProtocol = Readers.readInt(buffer);
+			networkProtocol = Readers.readInt(buffer);
+			serverName = Readers.readString(buffer, Readers.STRINGLEN);
+			clientName = Readers.readString(buffer, Readers.STRINGLEN);
+			mapName = Readers.readString(buffer, Readers.STRINGLEN);
+			gameDirectory = Readers.readString(buffer, Readers.STRINGLEN);
+			playbackTime = Readers.readFloat(buffer);
+			ticks = Readers.readInt(buffer);
+			frames = Readers.readInt(buffer);
+			signOnLength = Readers.readInt(buffer);
+			
 			System.out.println("HEADER: "+header);
 			System.out.println("DEMOPROTOCOL: "+demoProtocol);
 			System.out.println("NETWORKPROTOCOL: "+networkProtocol);
@@ -62,26 +51,13 @@ public class DEMOReader {
 			System.out.println("FRAMES: "+frames);
 			System.out.println("SIGNONLENGTH: "+signOnLength);
 			
-			//tester(buffer, false, 2000, false);
-	}
-
-	public String readString(DataInputStream buffer, int len) throws IOException {
-		data = new byte[len];
-		buffer.read(data, 0, len);
-		return (new String(data, "ISO-8859-1"));
-	}
-	
-	public int readInt(DataInputStream buffer) throws IOException {
-		return Integer.reverseBytes(buffer.readInt());
-	}
-	
-	public float readFloat(DataInputStream buffer) throws IOException {
-		return Float.intBitsToFloat(Integer.reverseBytes(buffer.readInt()));
+			//tester(buffer, true, 2000, false);
 	}
 	
 	public void tester(DataInputStream buffer, boolean filter, int testLimit, boolean decompress) throws IOException {
 		
 		int testCount = 0;
+		int test;
 		String uncompressed;
 		data = new byte[1];
 		while(testCount++ < testLimit) {
@@ -94,12 +70,8 @@ public class DEMOReader {
 					System.out.print(new String(data, "ISO-8859-1"));
 				}
 			} else {
-				System.out.print(data[0]+" ");
+				System.out.print(new String(data, "ISO-8859-1"));
 			}
 		}
-	}
-	
-	public static void main(String[] args) throws IOException {
-		DEMOReader demo = new DEMOReader("src/reader/demo.dem");
 	}
 }

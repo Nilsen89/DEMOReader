@@ -23,6 +23,7 @@ public class DEMParser {
 		this.buffer = buffer;
 	}
 	
+	//http://forum.xentax.com/viewtopic.php?f=36&t=13388
 	public void checkCommand(DataInputStream buffer) throws IOException {
 		System.out.println("-----CHECKING COMMAND------");
 		do {
