@@ -35,8 +35,8 @@ public class DEMParser {
 			}
 			tick = buffer.readInt();
 			if(command[0] == DEM_SIGNON) {
-				buffer.skipBytes(DEMOReader.signOnLength);
-				System.out.println("Skipped");
+				//TODO -- SKIP TO SIGNONLENGTH INDEX
+				buffer.skip(DEMOReader.signOnLength - position);
 			} else if(command[0] == DEM_PACKET) {
 				buffer.skipBytes(4);
 			}
