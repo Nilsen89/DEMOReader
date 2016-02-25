@@ -5,16 +5,16 @@ import java.io.IOException;
 
 public class DEMParser {
 	
-	public static final int DEM_SIGNON = 1;
-	public static final int DEM_PACKET = 2;
-	public static final int DEM_SYNCTICK = 3;
-	public static final int DEM_CONSOLECMD = 4;
-	public static final int DEM_USERCMD = 5;
-	public static final int DEM_DATATABLES = 6;
-	public static final int DEM_STOP = 7;
+	public static final int DEM_SIGNON = 0x01;
+	public static final int DEM_PACKET = 0x02;
+	public static final int DEM_SYNCTICK = 0x03;
+	public static final int DEM_CONSOLECMD = 0x04;
+	public static final int DEM_USERCMD = 0x05;
+	public static final int DEM_DATATABLES = 0x06;
+	public static final int DEM_STOP = 0x07;
 	public static final int DEM_LASTCOMMAND = DEM_STOP;
 	
-	public byte[] command;
+	public byte cmd;
 	public int tick;
 	
 	public DataInputStream buffer;
@@ -24,23 +24,40 @@ public class DEMParser {
 	}
 	
 	//http://forum.xentax.com/viewtopic.php?f=36&t=13388
+	//https://github.com/mikeemoo/jsgo/blob/master/lib/jsgo.js
 	public void checkCommand(DataInputStream buffer) throws IOException {
-		System.out.println("-----CHECKING COMMAND------");
+		System.out.println("-----CHECKING cmd------");
 		do {
-			command = new byte[1];
-			buffer.read(command);
-			if(command[0] == DEM_LASTCOMMAND) {
-				System.out.println("Last command");
-				break;
+			cmd = buffer.readByte();
+			tick = Readers.readInt(buffer);
+			if(cmd != DEM_PACKET) {
+				tick = 0;
 			}
-			tick = buffer.readInt();
-			if(command[0] == DEM_SIGNON) {
-				//TODO -- SKIP TO SIGNONLENGTH INDEX
-				buffer.skip(DEMOReader.signOnLength - position);
-			} else if(command[0] == DEM_PACKET) {
-				buffer.skipBytes(4);
+			
+			buffer.skip(1);
+			
+			switch(cmd) {
+				case DEM_SIGNON:
+					System.out.println("SignOn Running");
+				case DEM_PACKET:
+					CMDParser.parsePacket(buffer);
+					break;
+				case DEM_SYNCTICK:
+					CMDParser.parseSyncTick(buffer);
+					break;
+				case DEM_CONSOLECMD:
+					CMDParser.parseConsoleCMD(buffer);
+					break;
+				case DEM_USERCMD:
+					CMDParser.parseUserCMD(buffer);
+					break;
+				case DEM_DATATABLES:
+					CMDParser.parseDataTables(buffer);
+					break;
+				case DEM_LASTCOMMAND:
+					break;
 			}
-			System.out.println("Command: "+command[0]);
-		} while (command[0] != DEM_LASTCOMMAND);
+			
+		} while (cmd != DEM_LASTCOMMAND);
 	}
 }

@@ -4,8 +4,8 @@ import java.io.IOException;
 
 public class Executer {
 	public static void main(String[] args) throws IOException {
-		DEMOReader demoReader = new DEMOReader();
 		FileBuffer file = new FileBuffer("src/reader/demo.dem");
+		DEMOHeader demoReader = new DEMOHeader();
 		DEMParser demParser = new DEMParser(file.getBuffer());
 		
 		demoReader.parseHeader(file.getBuffer());

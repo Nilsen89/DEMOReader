@@ -5,23 +5,23 @@ import java.io.IOException;
 
 import org.xerial.snappy.Snappy;
 
-public class DEMOReader {
+public class DEMOHeader {
 
 	public byte[] data;
 	
-	public static String header; 				//8 characters, should be "HL2DEMO"+NULL
+	public static String header; 			//8 characters, should be "HL2DEMO"+NULL
 	public static int demoProtocol;			//Demo protocol version
 	public static int networkProtocol;		//Network protocol version number
-	public static String serverName;			//260 characters long
-	public static String clientName;			//260 characters long
-	public static String mapName;				//260 characters long
+	public static String serverName;		//260 characters long
+	public static String clientName;		//260 characters long
+	public static String mapName;			//260 characters long
 	public static String gameDirectory;		//260 characters long
-	public static float playbackTime;			//The length of the demo, in seconds
-	public static int ticks;					//The number of ticks in the demo
-	public static int frames;					//The number of frames in the demo
+	public static float playbackTime;		//The length of the demo, in seconds
+	public static int ticks;				//The number of ticks in the demo
+	public static int frames;				//The number of frames in the demo
 	public static int signOnLength;			//Length of the sign on data (Init for first frame)
 	
-	public DEMOReader() {}
+	public DEMOHeader() {}
 	
 	public void parseHeader(DataInputStream buffer) throws IOException {
 			
