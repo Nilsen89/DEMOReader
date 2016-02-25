@@ -1,14 +1,29 @@
 package reader;
 
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class CMDParser {
 
 	public CMDParser() {}
 	
-	public static void parsePacket(DataInputStream buffer) {
+	public static int packetSize;
+	
+	public static void parsePacket(DataInputStream buffer) throws IOException {
 		// TODO Auto-generated method stub
+		buffer.skip(160);
+		Readers.position += 160;
+		
+		packetSize = Readers.readInt(buffer);
+		int stopper = packetSize + Readers.position;
+		
 		System.out.println("RUNNING: parsePacket");
+		System.out.println("packetSize: "+packetSize);
+		
+		while(Readers.position < stopper) {
+			
+		}
+		
 	}
 	
 	public static void parseConsoleCMD(DataInputStream buffer) {

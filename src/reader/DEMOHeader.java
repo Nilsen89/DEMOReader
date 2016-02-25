@@ -3,7 +3,7 @@ package reader;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import org.xerial.snappy.Snappy;
+//import org.xerial.snappy.Snappy;
 
 public class DEMOHeader {
 
@@ -51,10 +51,10 @@ public class DEMOHeader {
 			System.out.println("FRAMES: "+frames);
 			System.out.println("SIGNONLENGTH: "+signOnLength);
 			
-			//tester(buffer, true, 2000, false);
+			//tester(buffer, false, 5000, false);
 	}
 	
-	public void tester(DataInputStream buffer, boolean filter, int testLimit, boolean decompress) throws IOException {
+	/*public void tester(DataInputStream buffer, boolean filter, int testLimit, boolean decompress) throws IOException {
 		
 		int testCount = 0;
 		int test;
@@ -73,5 +73,5 @@ public class DEMOHeader {
 				System.out.print(new String(data, "ISO-8859-1"));
 			}
 		}
-	}
+	}*/
 }

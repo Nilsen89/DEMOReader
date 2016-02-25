@@ -57,6 +57,8 @@ public class DEMParser {
 				case DEM_LASTCOMMAND:
 					break;
 			}
+			//tester break
+			break;
 			
 		} while (cmd != DEM_LASTCOMMAND);
 	}
